@@ -1,48 +1,33 @@
-
 from pytesseract import image_to_string
 from PIL import Image
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 import time
 import re
 import os
 
-driver = webdriver.Chrome()
+os.chdir('C:/Users/akao/Desktop')
 
+keyword = "dog care"
+
+driver = webdriver.Chrome()
 driver.get("http://google.com")
 elem = driver.find_element_by_name("q")
-elem.send_keys("dog food healthy")
+elem.send_keys(keyword)
 time.sleep(1)
+driver.set_window_size(1100, 900)
 driver.execute_script("document.body.style.zoom='200%'")
-"""
-driver.set_window_size(1400, 1000)
-time.sleep(2)
-elem.send_keys(Keys.RETURN)
-time.sleep(1)
-elem.send_keys(Keys.CONTROL, Keys.ADD)
-time.sleep(2)
-elem.send_keys(Keys.CONTROL, Keys.ADD)
-time.sleep(1)
-elem.send_keys(Keys.CONTROL, Keys.ADD)
-time.sleep(1)
-elem.send_keys(Keys.RETURN)
-time.sleep(1)
-"""
-
 total_height = driver.execute_script('return document.body.scrollHeight')
 window_height = driver.execute_script('return document.documentElement.clientHeight')
 
 n = 0
 for num in range(0, total_height, window_height):
     driver.execute_script('window.scrollTo(0,%d)' % num)
-    print num
     n += 1
-    string = 'dogfood' + str(n)
+    string = keyword + str(n)
     driver.save_screenshot('%s.png' % string)
 
-
-# driver.get_screenshot_as_file('t1.png')
 driver.close()
+
 
 def find_yellow_pixels(im):
     pix = im.load()
@@ -76,10 +61,10 @@ def find_yellow_pixels(im):
             yellow_end_y.append(yellow_y[i])
     yellow_end_y.append(yellow_y[-1])
 
-    print yellow_begin_x
-    print yellow_end_x
-    print yellow_begin_y
-    print yellow_end_y
+    #print yellow_begin_x
+    #print yellow_end_x
+    #print yellow_begin_y
+    #print yellow_end_y
     for k in range(len(yellow_begin_y)):
         for i in range(yellow_begin_x[0], yellow_end_x[0] + 1):
             for j in range(yellow_begin_y[k], yellow_end_y[k] + 1):
@@ -91,8 +76,9 @@ def find_yellow_pixels(im):
                     pix[i,j] = (255 - pix[i,j][0], 255 - pix[i,j][1], 255 - pix[i,j][2])
     return im
 
+ad_urls = list()
 for i in range(n):
-    string = 'dogfood' + str(i+1)
+    string = keyword + str(i+1)
     im = Image.open('%s.png' % string)
     try:
         im = find_yellow_pixels(im)
@@ -105,10 +91,14 @@ for i in range(n):
     im2.split()
     parsed_text = image_to_string(im2)
     lines = re.split('\n', parsed_text)
-    print lines
+    #print lines
 
     for i in range(0, len(lines)):
         if lines[i][0:4] == ":Ad:":
             sss = lines[i][5:]
-            final = sss.replace('|', 'l').replace('.coml', '.com').replace('.corn', '.com')
-            print final
+
+            final = sss.replace('|', 'l').replace('.coml', '.com/').replace('.corn', '.com')
+            if final not in ad_urls:
+                ad_urls.append(final)
+                final_desc =  'No.' + str(len(ad_urls)) + ' ad url : ' + final
+                print final_desc

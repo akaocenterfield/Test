@@ -4,7 +4,6 @@ import pandas as pd
 import datetime
 
 df = pd.read_csv('ch_history.csv', skiprows=1)
-df = df[(df['Campaign'] == 'Search - Generic - Exact')|(df['Campaign'] == 'Search - Generic - Exact 2')]  
 df = df.reset_index(drop=True)
 
 line_num = list()
@@ -69,4 +68,4 @@ clean_df['Adgroup'] = adgroup
 clean_df['Keyword'] = keyword
 clean_df['Before'] = before_bid
 clean_df['After'] = after_bid
-clean_df.to_csv('bids.csv', sep=',')
+clean_df.to_csv('clean.csv', sep=',')

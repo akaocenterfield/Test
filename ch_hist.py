@@ -3,7 +3,9 @@ import re
 import pandas as pd
 import datetime
 
-df = pd.read_csv('ch.csv', skiprows=range(0,1))
+df = pd.read_csv('ch_history.csv', skiprows=1)
+df = df[(df['Campaign'] == 'Search - Generic - Exact')|(df['Campaign'] == 'Search - Generic - Exact 2')]  
+df = df.reset_index(drop=True)
 
 line_num = list()
 dates = list()
@@ -35,8 +37,16 @@ for ii in range(0, len(df)):
                 kw_indx1 = split3[0].index('[')
                 kw_indx2 = split3[0].index(']')
                 kw = split3[0][kw_indx1 + 1 : kw_indx2]
-                before = float(re.split(' ',split3[1])[0])
-                after = float(split3[2])
+                before1 = re.split(' ',split3[1])[0]
+				
+                if(')' in before1):
+                    before = float(before1[:-1])
+                else:
+                    before = float(before1)   
+                try:
+				  after = float(split3[2])
+                except:
+				  print ii, jj, kk, split3
                 line_num.append(ii)
                 dates.append(date_string)
                 YY.append(date_time.year) 
@@ -59,5 +69,4 @@ clean_df['Adgroup'] = adgroup
 clean_df['Keyword'] = keyword
 clean_df['Before'] = before_bid
 clean_df['After'] = after_bid
-clean_df.to_csv('cleanedup.csv', sep=',')
-       
+clean_df.to_csv('bids.csv', sep=',')

@@ -1,27 +1,32 @@
+
 from pytesseract import image_to_string
 from PIL import Image
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 import time
 import re
 import os
 
-os.chdir('')
+os.chdir('C:/Users')
 
-keyword = "pet care plans"
+keyword = "flowers online buy"
 
 driver = webdriver.Chrome()
 driver.get("http://ask.com")
 elem = driver.find_element_by_name("q")
 elem.send_keys(keyword)
+elem.send_keys(Keys.RETURN)
 time.sleep(1)
-driver.set_window_size(1300, 900)
-driver.execute_script("document.body.style.zoom='200%'")
+driver.set_window_size(1350, 900)
+driver.execute_script("document.body.style.zoom='300%'")
+time.sleep(1)
 total_height = driver.execute_script('return document.body.scrollHeight')
 window_height = driver.execute_script('return document.documentElement.clientHeight')
 
 n = 0
-for num in range(0, total_height, window_height):
+for num in range(0, total_height, window_height - 85):
     driver.execute_script('window.scrollTo(0,%d)' % num)
+    time.sleep(1)
     print num
     n += 1
     string = keyword + str(n)
@@ -104,7 +109,12 @@ for i in range(n):
 print ads_in_pic
 
 
+def tidy_url(url):
+    clean_url = url.replace('vv','w').replace('|', 'l').replace('.coml', '.com/').replace('.corn', '.com')
+    return clean_url
 
+
+all = {}
 ad_urls = []
 p = 1
 for j in range(n):
@@ -119,16 +129,23 @@ for j in range(n):
         #print lines
 
         for i in range(0, len(lines)):
-            if lines[i][0:4] == ":Ad:":
-                sss = lines[i][5:]
-                clean_url = sss.replace('|', 'l').replace('.coml', '.com/').replace('.corn', '.com')
+            if "Ad" in lines[i][0:4]:
+                sss = re.split(' ', lines[i])[1]
+                clean_url = tidy_url(sss)
+
                 if clean_url not in ad_urls:
                     ad_urls.append(clean_url)
 
                     if p == 1:
+                        rank = str(len(ad_urls)) + 't'
                         final_desc =  str(len(ad_urls)) + ' (top) : ' + clean_url
                     else:
+                        rank = str(len(ad_urls)) + 'b'
                         final_desc =  str(len(ad_urls)) + ' (bottom) : ' + clean_url
+
+                    if clean_url not in all.keys():
+                        all[clean_url] = rank
+
                     print final_desc
 
-print ad_urls
+print all
